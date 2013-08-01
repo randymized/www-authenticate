@@ -35,5 +35,5 @@
     "grunt-contrib-watch": "~0.3.1",
     "grunt": "~0.4.1"
   },
-  "keywords": []
+  "keywords": ["www-authenticate","HTTP","digest","authentication"]
 }
