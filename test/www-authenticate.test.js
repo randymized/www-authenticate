@@ -2,7 +2,7 @@
 'use strict';
 require('should');
 var www_authenticate = require('..')
-  , parsers = require('../lib/parsers')
+  , parsers = www_authenticate.parsers;
   ;
 
 var CNONCE='0a4f113b'

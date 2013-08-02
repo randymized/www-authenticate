@@ -39,6 +39,15 @@ if (authenticator.err) throw err; // or do something similarly drastic
 //... now, whenever you make a request, add an Authorization header:
 response.setHeader('authorize', authenticator.authorize('GET',url));
 
+---
+var parsers = require('www-authenticate').parsers;
+var parsed= new parsers.WWW_Authenticate(request.headers['www-authenticate']);
+console.log(parsed.scheme);
+console.log(parsed.parms.nonce);
+
+var parsed= new parsers.Authentication_Info(request.headers['authentication-info']);
+console.log(parsed.parms.nonce);
+
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
