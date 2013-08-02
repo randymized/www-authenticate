@@ -78,5 +78,24 @@ describe( 'www-authenticate', function() {
       parms['cnonce'].should.equal('abc"def');  // double double quote properly parsed as single double quote
       done();
     } );
+    it( 'should correctly parse a quoted string that includes a comma', function(done) {
+      var header_parser= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
+      var parsed= new parsers.Authentication_Info(
+                 'nextnonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+                 'qop="auth,auth-int", '+
+                 'rspauth="6629fae49393a05397450978507c4ef1", '+
+                 'nc=00000001, '+
+                 'cnonce="abc""d,ef"'
+              );
+      parsed.should.not.have.property('err');
+      var parms= parsed.parms;
+      parms.should.have.property('nextnonce','dcd98b7102dd2f0e8b11d0f600bfb0c093');
+      parms['nextnonce'].should.equal('dcd98b7102dd2f0e8b11d0f600bfb0c093');
+      parms['qop'].should.equal('auth,auth-int');
+      parms['rspauth'].should.equal('6629fae49393a05397450978507c4ef1');
+      parms['nc'].should.equal('00000001');
+      parms['cnonce'].should.equal('abc"d,ef');  // double double quote properly parsed as single double quote
+      done();
+    } );
   } );
 } );
