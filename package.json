@@ -1,6 +1,6 @@
 {
   "name": "www-authenticate",
-  "description": "Parse WWW-Authenticate header and generate Authorization request headers for HTTP Basic and Digest authentication clients.",
+  "description": "Provides the functionality needed for a client to use HTTP Basic or Digest authentication.  Also provides primitives for parsing WWW-Authenticate and Authentication_Info headers.",
   "version": "0.1.0",
   "homepage": "https://github.com/randymized/www-authenticate",
   "author": {

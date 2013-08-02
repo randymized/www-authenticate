@@ -10,16 +10,17 @@ var www_authenticate = require( 'www-authenticate' );
 ```
 
 ## Documentation
-Component that parses the content of a WWW-Authenticate header sent by a server that requires HTTP Basic or Digest authentication to access resources.  It then generates the content for a Authorization header that satisfies the authentication challenge for a given username and password combination.
+Provides the functionality needed for a client to use HTTP Basic or Digest authentication.  Also provides primitives for parsing WWW-Authenticate and Authentication_Info headers.
 
-This component would normally be used as part of a HTTP client implementation.
+Parses the content of a WWW-Authenticate header sent by a server. Interpret the authentication challenge posed. Then generate the credentials for Authorization headers for subsequent requests from the server.
 
-- Supports Basic and Digest authentication schemes
-- Supports 'auth' quality of protection (qop) and challenges that do not include qop
-- Supports MD5 and MD5-sess algorithms
+- Supports Basic and Digest authentication schemes.
+- Supports 'auth' quality of protection (qop) and challenges that do not include qop.
+- Supports MD5 and MD5-sess algorithms.
+- Assumes Node.js, but otherwise makes no assumtion about framework.
 
 ## Limitations
-- Basic authetication scheme is untested
+- Basic authetication scheme is untested.
 - Included tests only test Digest scheme against the rfc2617 example.
 - Most of the permutations of qop and algorithm have not been tested.
 - Little real-world testing.  That's where you can help!  Report any failures or submit a patch that resolves an authentication failure.
@@ -29,15 +30,14 @@ This component would normally be used as part of a HTTP client implementation.
 
 ## Examples
 var www_authenticate = require('www-authenticate');
-var header_parser= www_authenticate(username,password);
+var on_www_authenticate= www_authenticate(username,password);
 
 // now wait for HTTP/1.1 401 Unauthorized and then parse the WWW_Authenticate header
-header_parser(req.header.www_authenticate, function(err,authorizer) {
-    var authorize= authorizer.authorize;
+var authenticator= on_www_authenticate(req.header.www_authenticate);
+if (authenticator.err) throw err; // or do something similarly drastic
 
-    //... now, whenever you make a request, add an Authorization header:
-    res.header.authorize= authorize('GET',url)
-})
+//... now, whenever you make a request, add an Authorization header:
+response.setHeader('authorize', authenticator.authorize('GET',url));
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
