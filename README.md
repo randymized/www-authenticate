@@ -1,11 +1,5 @@
 # www-authenticate [![Build Status](https://secure.travis-ci.org/randymized/www-authenticate.png?branch=master)](http://travis-ci.org/randymized/www-authenticate)
 
-> Parse WWW-Authenticate header and generate Authorization request headers for HTTP Basic and Digest authentication clients.
-
-## Getting Started
-Install the module with: `npm install www-authenticate`
-See examples below.
-
 ## Documentation
 Provides the functionality needed for a client to use HTTP Basic or Digest authentication.  Also provides primitives for parsing WWW-Authenticate and Authentication_Info headers.
 
@@ -24,6 +18,10 @@ Parses the content of a WWW-Authenticate header sent by a server. Interpret the 
 - Will not parse WWW-Authenticate headers that contain more than one challenge.  Please send an example of one if you find one in the field or modify the parser to parse it.
 - Does not support auth-int qop, but will use auth qop if server allows either.  Support could surely be added in the future.
 - Response to challenges without qop have not been tested.
+
+## Getting Started
+Install the module with: `npm install www-authenticate`
+See examples below.
 
 ## Examples
 ```javascript
