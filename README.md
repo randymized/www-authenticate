@@ -4,10 +4,7 @@
 
 ## Getting Started
 Install the module with: `npm install www-authenticate`
-
-```javascript
-var www_authenticate = require( 'www-authenticate' );
-```
+See examples below.
 
 ## Documentation
 Provides the functionality needed for a client to use HTTP Basic or Digest authentication.  Also provides primitives for parsing WWW-Authenticate and Authentication_Info headers.
@@ -29,6 +26,7 @@ Parses the content of a WWW-Authenticate header sent by a server. Interpret the 
 - Response to challenges without qop have not been tested.
 
 ## Examples
+```javascript
 var www_authenticate = require('www-authenticate');
 var on_www_authenticate= www_authenticate(username,password);
 
@@ -38,8 +36,9 @@ if (authenticator.err) throw err; // or do something similarly drastic
 
 //... now, whenever you make a request, add an Authorization header:
 response.setHeader('authorize', authenticator.authorize('GET',url));
-
+```
 ---
+```javascript
 var parsers = require('www-authenticate').parsers;
 var parsed= new parsers.WWW_Authenticate(request.headers['www-authenticate']);
 console.log(parsed.scheme);
@@ -47,6 +46,7 @@ console.log(parsed.parms.nonce);
 
 var parsed= new parsers.Authentication_Info(request.headers['authentication-info']);
 console.log(parsed.parms.nonce);
+```
 
 ## Contributing
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
