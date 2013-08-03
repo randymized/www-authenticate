@@ -15,6 +15,30 @@ describe( 'www-authenticate', function() {
     it( 'should return a function', function() {
       www_authenticate()
     } );
+    it( 'should authenticate rfc1945 example', function(done) {
+      var on_www_authenticate= www_authenticate("Aladdin","open sesame",{cnonce:CNONCE})
+      //...receive HTTP/1.1 401 Unauthorized
+      // parse header['www-authenticate']:
+      var authenticator= on_www_authenticate('Basic realm="sample"');
+      if (authenticator.err) throw err;
+      // now, whenever you need to create an Authorization header:
+      authenticator.authorize("GET","/dir/index.html").should.equal(
+            'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
+      );
+      done();
+    } );
+    it( 'should authenticate rfc1945 example even without method and path (they do not matter)', function(done) {
+      var on_www_authenticate= www_authenticate("Aladdin","open sesame",{cnonce:CNONCE})
+      //...receive HTTP/1.1 401 Unauthorized
+      // parse header['www-authenticate']:
+      var authenticator= on_www_authenticate('Basic realm="sample"');
+      if (authenticator.err) throw err;
+      // now, whenever you need to create an Authorization header:
+      authenticator.authorize().should.equal(
+            'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
+      );
+      done();
+    } );
     it( 'should authenticate rfc2617 example', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       //...receive HTTP/1.1 401 Unauthorized
