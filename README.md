@@ -29,11 +29,11 @@ var www_authenticate = require('www-authenticate');
 var on_www_authenticate= www_authenticate(username,password);
 
 // now wait for HTTP/1.1 401 Unauthorized and then parse the WWW_Authenticate header
-var authenticator= on_www_authenticate(req.header.www_authenticate);
+var authenticator= on_www_authenticate(response.headers['www-authenticate']);
 if (authenticator.err) throw err; // or do something similarly drastic
 
 //... now, whenever you make a request, add an Authorization header:
-response.setHeader('authorize', authenticator.authorize('GET',url));
+response.setHeader('authorization', authenticator.authorize('GET',url));
 ```
 ---
 ```javascript
