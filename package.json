@@ -1,7 +1,7 @@
 {
   "name": "www-authenticate",
   "description": "Provides the functionality needed for a client to use HTTP Basic or Digest authentication.  Also provides primitives for parsing WWW-Authenticate and Authentication_Info headers.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "homepage": "https://github.com/randymized/www-authenticate",
   "author": {
     "name": "Randy McLaughlin",
