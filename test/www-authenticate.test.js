@@ -88,6 +88,46 @@ describe( 'www-authenticate', function() {
       );
       done();
     } );
+    it( 'should allow a blank cnonce to be specified', function(done) {
+      var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:''})
+      //...receive HTTP/1.1 401 Unauthorized
+      // parse header['www-authenticate']:
+      var authenticator= on_www_authenticate('Digest '+
+                 'realm="testrealm@host.com", '+
+                 'qop="auth,auth-int", '+
+                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+      )
+      if (authenticator.err) throw err;
+      // now, whenever you need to create an Authorization header:
+      authenticator.authorize("GET","/dir/index.html").should.equal(
+            'Digest username="Mufasa", '+
+            'realm="testrealm@host.com", '+
+            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+            'uri="/dir/index.html", '+
+            'qop=auth, '+
+            'nc=00000001, '+
+            'cnonce="", '+
+            'response="feee16a35faef0a0371c7210e4bdb6a5", '+
+            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+      );
+      done();
+    } );
+    it( 'should generate a hexadecimal cnonce if one is not specified', function(done) {
+      var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life")
+      //...receive HTTP/1.1 401 Unauthorized
+      // parse header['www-authenticate']:
+      var authenticator= on_www_authenticate('Digest '+
+                 'realm="testrealm@host.com", '+
+                 'qop="auth,auth-int", '+
+                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+      )
+      if (authenticator.err) throw err;
+      // now, whenever you need to create an Authorization header:
+      authenticator.authorize("GET","/dir/index.html").search(/cnonce="[0-9a-f]+"/).should.not.equal('-1');
+      done();
+    } );
     it( 'should increment nonce-count', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       var authenticator= on_www_authenticate('Digest '+
