@@ -40,7 +40,7 @@ describe( 'www-authenticate', function() {
       done();
     } );
     it( 'should be capable of doing Basic authentication without any password', function(done) {
-      var on_www_authenticate= www_authenticate("Aladdin",null,{password_optional: true})
+      var on_www_authenticate= www_authenticate("Aladdin")
       //...receive HTTP/1.1 401 Unauthorized
       // parse header['www-authenticate']:
       var authenticator= on_www_authenticate('Basic realm="sample"');
@@ -48,6 +48,18 @@ describe( 'www-authenticate', function() {
       // now, whenever you need to create an Authorization header:
       authenticator.authorize().should.equal(
             'Basic ' + new Buffer('Aladdin').toString('base64')
+      );
+      done();
+    } );
+    it( 'should handle a blank password differently than a non-existant one', function(done) {
+      var on_www_authenticate= www_authenticate("Aladdin", "")
+      //...receive HTTP/1.1 401 Unauthorized
+      // parse header['www-authenticate']:
+      var authenticator= on_www_authenticate('Basic realm="sample"');
+      if (authenticator.err) throw err;
+      // now, whenever you need to create an Authorization header:
+      authenticator.authorize().should.equal(
+            'Basic ' + new Buffer('Aladdin:').toString('base64')
       );
       done();
     } );
