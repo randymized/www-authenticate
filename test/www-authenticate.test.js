@@ -16,7 +16,7 @@ describe( 'www-authenticate', function() {
       www_authenticate()
     } );
     it( 'should authenticate rfc1945 example', function(done) {
-      var on_www_authenticate= www_authenticate("Aladdin","open sesame",{cnonce:CNONCE})
+      var on_www_authenticate= www_authenticate("Aladdin","open sesame")
       //...receive HTTP/1.1 401 Unauthorized
       // parse header['www-authenticate']:
       var authenticator= on_www_authenticate('Basic realm="sample"');
@@ -28,7 +28,7 @@ describe( 'www-authenticate', function() {
       done();
     } );
     it( 'should authenticate rfc1945 example even without method and path (they do not matter)', function(done) {
-      var on_www_authenticate= www_authenticate("Aladdin","open sesame",{cnonce:CNONCE})
+      var on_www_authenticate= www_authenticate("Aladdin","open sesame")
       //...receive HTTP/1.1 401 Unauthorized
       // parse header['www-authenticate']:
       var authenticator= on_www_authenticate('Basic realm="sample"');
@@ -36,6 +36,18 @@ describe( 'www-authenticate', function() {
       // now, whenever you need to create an Authorization header:
       authenticator.authorize().should.equal(
             'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
+      );
+      done();
+    } );
+    it( 'should be capable of doing Basic authentication without any password', function(done) {
+      var on_www_authenticate= www_authenticate("Aladdin",null,{password_optional: true})
+      //...receive HTTP/1.1 401 Unauthorized
+      // parse header['www-authenticate']:
+      var authenticator= on_www_authenticate('Basic realm="sample"');
+      if (authenticator.err) throw err;
+      // now, whenever you need to create an Authorization header:
+      authenticator.authorize().should.equal(
+            'Basic ' + new Buffer('Aladdin').toString('base64')
       );
       done();
     } );
