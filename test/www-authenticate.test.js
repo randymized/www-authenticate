@@ -176,5 +176,34 @@ describe( 'www-authenticate', function() {
       parms['cnonce'].should.equal('abc"d,ef');  // double double quote properly parsed as single double quote
       done();
     } );
+    it( 'should provide a higher-level authenticator', function(done) {
+      var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
+      var authenticator= on_www_authenticate.authenticator;
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': 'Digest '+
+                 'realm="testrealm@host.com", '+
+                 'qop="auth,auth-int", '+
+                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+        }
+      });
+      var headers= {}
+      authenticator.authenticate(headers,"GET","/dir/index.html");
+      if (authenticator.err) throw err;
+      headers.should.have.property('authorization',
+            'Digest username="Mufasa", '+
+            'realm="testrealm@host.com", '+
+            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+            'uri="/dir/index.html", '+
+            'qop=auth, '+
+            'nc=00000001, '+
+            'cnonce="'+CNONCE+'", '+
+            'response="6629fae49393a05397450978507c4ef1", '+
+            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+      );
+      done();
+    } );
   } );
 } );
