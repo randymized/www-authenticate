@@ -6,6 +6,37 @@ var www_authenticate = require('..')
   ;
 
 var CNONCE='0a4f113b'
+var RFC2617_challenge= 'Digest '+
+                 'realm="testrealm@host.com", '+
+                 'qop="auth,auth-int", '+
+                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"';
+var RFC2617_response=
+    'Digest username="Mufasa", '+
+    'realm="testrealm@host.com", '+
+    'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
+    'uri="/dir/index.html", '+
+    'qop=auth, '+
+    'nc=00000001, '+
+    'cnonce="'+CNONCE+'", '+
+    'response="6629fae49393a05397450978507c4ef1", '+
+    'opaque="5ccc069c403ebaf9f0171e9517f40e41"';
+function replace_nc(replacement,s)
+{
+  return s.replace('00000001',replacement)
+}
+function replace_response(replacement,s)
+{
+  return s.replace('6629fae49393a05397450978507c4ef1',replacement)
+}
+function replace_uri(replacement,s)
+{
+  return s.replace('/dir/index.html',replacement)
+}
+function replace_cnonce(replacement,s)
+{
+  return s.replace(CNONCE,replacement)
+}
 
 describe( 'www-authenticate', function() {
   describe( 'www_authenticate()', function() {
@@ -67,49 +98,23 @@ describe( 'www-authenticate', function() {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       //...receive HTTP/1.1 401 Unauthorized
       // parse header['www-authenticate']:
-      var authenticator= on_www_authenticate('Digest '+
-                 'realm="testrealm@host.com", '+
-                 'qop="auth,auth-int", '+
-                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      )
+      var authenticator= on_www_authenticate(RFC2617_challenge);
       if (authenticator.err) throw err;
       // now, whenever you need to create an Authorization header:
-      authenticator.authorize("GET","/dir/index.html").should.equal(
-            'Digest username="Mufasa", '+
-            'realm="testrealm@host.com", '+
-            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-            'uri="/dir/index.html", '+
-            'qop=auth, '+
-            'nc=00000001, '+
-            'cnonce="'+CNONCE+'", '+
-            'response="6629fae49393a05397450978507c4ef1", '+
-            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      );
+      authenticator.authorize("GET","/dir/index.html").should.equal(RFC2617_response);
       done();
     } );
     it( 'should allow a blank cnonce to be specified', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:''})
       //...receive HTTP/1.1 401 Unauthorized
       // parse header['www-authenticate']:
-      var authenticator= on_www_authenticate('Digest '+
-                 'realm="testrealm@host.com", '+
-                 'qop="auth,auth-int", '+
-                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      )
+      var authenticator= on_www_authenticate(RFC2617_challenge)
       if (authenticator.err) throw err;
       // now, whenever you need to create an Authorization header:
       authenticator.authorize("GET","/dir/index.html").should.equal(
-            'Digest username="Mufasa", '+
-            'realm="testrealm@host.com", '+
-            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-            'uri="/dir/index.html", '+
-            'qop=auth, '+
-            'nc=00000001, '+
-            'cnonce="", '+
-            'response="feee16a35faef0a0371c7210e4bdb6a5", '+
-            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+        replace_cnonce('',
+          replace_response('feee16a35faef0a0371c7210e4bdb6a5',RFC2617_response)
+        )
       );
       done();
     } );
@@ -117,12 +122,7 @@ describe( 'www-authenticate', function() {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life")
       //...receive HTTP/1.1 401 Unauthorized
       // parse header['www-authenticate']:
-      var authenticator= on_www_authenticate('Digest '+
-                 'realm="testrealm@host.com", '+
-                 'qop="auth,auth-int", '+
-                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      )
+      var authenticator= on_www_authenticate(RFC2617_challenge)
       if (authenticator.err) throw err;
       // now, whenever you need to create an Authorization header:
       authenticator.authorize("GET","/dir/index.html").search(/cnonce="[0-9a-f]+"/).should.not.equal('-1');
@@ -130,12 +130,7 @@ describe( 'www-authenticate', function() {
     } );
     it( 'should increment nonce-count', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
-      var authenticator= on_www_authenticate('Digest '+
-                 'realm="testrealm@host.com", '+
-                 'qop="auth,auth-int", '+
-                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      );
+      var authenticator= on_www_authenticate(RFC2617_challenge);
       authenticator.authorize("GET","/dir/index.html");
       authenticator.authorize("GET","/dir/index.html").should.include('nc=00000002');
       done();
@@ -182,27 +177,13 @@ describe( 'www-authenticate', function() {
       authenticator.get_challenge({
         statusCode: 401,
         headers: {
-          'www-authenticate': 'Digest '+
-                 'realm="testrealm@host.com", '+
-                 'qop="auth,auth-int", '+
-                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+          'www-authenticate': RFC2617_challenge
         }
       });
       var headers= {}
       authenticator.authenticate(headers,"GET","/dir/index.html");
       if (authenticator.err) throw err;
-      headers.should.have.property('authorization',
-            'Digest username="Mufasa", '+
-            'realm="testrealm@host.com", '+
-            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-            'uri="/dir/index.html", '+
-            'qop=auth, '+
-            'nc=00000001, '+
-            'cnonce="'+CNONCE+'", '+
-            'response="6629fae49393a05397450978507c4ef1", '+
-            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      );
+      headers.should.have.property('authorization',RFC2617_response);
       done();
     } );
     it( 'should authenticate multiple messages with the higher-level authenticator', function(done) {
@@ -211,41 +192,23 @@ describe( 'www-authenticate', function() {
       authenticator.get_challenge({
         statusCode: 401,
         headers: {
-          'www-authenticate': 'Digest '+
-                 'realm="testrealm@host.com", '+
-                 'qop="auth,auth-int", '+
-                 'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-                 'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+          'www-authenticate': RFC2617_challenge
         }
       });
       var headers= {}
       authenticator.authenticate(headers,"GET","/dir/index.html");
       if (authenticator.err) throw err;
-      headers.should.have.property('authorization',
-            'Digest username="Mufasa", '+
-            'realm="testrealm@host.com", '+
-            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-            'uri="/dir/index.html", '+
-            'qop=auth, '+
-            'nc=00000001, '+
-            'cnonce="'+CNONCE+'", '+
-            'response="6629fae49393a05397450978507c4ef1", '+
-            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
-      );
+      headers.should.have.property('authorization',RFC2617_response);
 
       headers= {}
       authenticator.authenticate(headers,"GET","/dir/other.html");
       if (authenticator.err) throw err;
       headers.should.have.property('authorization',
-            'Digest username="Mufasa", '+
-            'realm="testrealm@host.com", '+
-            'nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", '+
-            'uri="/dir/other.html", '+
-            'qop=auth, '+
-            'nc=00000002, '+
-            'cnonce="'+CNONCE+'", '+
-            'response="8fd933ee1915789a949cf71f0cee4581", '+
-            'opaque="5ccc069c403ebaf9f0171e9517f40e41"'
+        replace_uri('/dir/other.html',
+          replace_nc('00000002',
+            replace_response('8fd933ee1915789a949cf71f0cee4581',RFC2617_response)
+          )
+        )
       );
       done();
     } );
