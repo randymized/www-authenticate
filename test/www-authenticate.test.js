@@ -181,7 +181,7 @@ describe( 'www-authenticate', function() {
         }
       });
       var headers= {}
-      authenticator.authenticate(headers,"GET","/dir/index.html");
+      authenticator.authenticate_headers(headers,"GET","/dir/index.html");
       if (authenticator.err) throw err;
       headers.should.have.property('authorization',RFC2617_response);
       done();
@@ -196,12 +196,12 @@ describe( 'www-authenticate', function() {
         }
       });
       var headers= {}
-      authenticator.authenticate(headers,"GET","/dir/index.html");
+      authenticator.authenticate_headers(headers,"GET","/dir/index.html");
       if (authenticator.err) throw err;
       headers.should.have.property('authorization',RFC2617_response);
 
       headers= {}
-      authenticator.authenticate(headers,"GET","/dir/other.html");
+      authenticator.authenticate_headers(headers,"GET","/dir/other.html");
       if (authenticator.err) throw err;
       headers.should.have.property('authorization',
         replace_uri('/dir/other.html',
@@ -212,7 +212,7 @@ describe( 'www-authenticate', function() {
       );
       done();
     } );
-    it( 'authenticate using the options object to http.request', function(done) {
+    it( 'can authenticate using the options object to http.request', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       var authenticator= on_www_authenticate.authenticator;
       authenticator.get_challenge({
@@ -229,6 +229,19 @@ describe( 'www-authenticate', function() {
       if (authenticator.err) throw err;
       options.should.have.property('headers');
       options.headers.should.have.property('authorization',RFC2617_response);
+      done();
+    } );
+    it( 'can simply return the authentication string from the higher level functionality', function(done) {
+      var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
+      var authenticator= on_www_authenticate.authenticator;
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      if (authenticator.err) throw err;
+      authenticator.authentication_string("GET","/dir/index.html").should.equal(RFC2617_response);
       done();
     } );
   } );
