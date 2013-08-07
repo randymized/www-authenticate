@@ -212,5 +212,24 @@ describe( 'www-authenticate', function() {
       );
       done();
     } );
+    it( 'authenticate using the options object to http.request', function(done) {
+      var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
+      var authenticator= on_www_authenticate.authenticator;
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      var options= {
+        method: "GET",
+        path: "/dir/index.html"
+      }
+      authenticator.authenticate_request_options(options);
+      if (authenticator.err) throw err;
+      options.should.have.property('headers');
+      options.headers.should.have.property('authorization',RFC2617_response);
+      done();
+    } );
   } );
 } );
