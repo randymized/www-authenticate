@@ -44,7 +44,7 @@ describe( 'www-authenticate', function() {
       www_authenticate.should.be.a( 'function' );
     } );
     it( 'should return a function', function() {
-      www_authenticate()
+      www_authenticate('user')
     } );
     it( 'should authenticate rfc1945 example', function(done) {
       var on_www_authenticate= www_authenticate("Aladdin","open sesame")
