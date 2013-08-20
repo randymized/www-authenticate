@@ -11,7 +11,6 @@ Parses the content of a WWW-Authenticate header sent by a server. Interpret the 
 - Assumes Node.js, but otherwise makes no assumtion about framework.
 
 ## Limitations
-- Basic authetication scheme is untested.
 - Included tests only test Digest scheme against the rfc2617 example.
 - Most of the permutations of qop and algorithm have not been tested.
 - Little real-world testing.  That's where you can help!  Report any failures or submit a patch that resolves an authentication failure.
@@ -27,8 +26,7 @@ See examples below.
 Use the high level interface:
 ```javascript
 var www_authenticate = require('www-authenticate');
-var on_www_authenticate= www_authenticate(username,password)
-var authenticator= on_www_authenticate.authenticator;
+var authenticator= www_authenticate.authenticator(username,password);
 
 // Whenever you receive a response, send it to the authenticator.
 // The authenticator will parse and record any challenge it contains.

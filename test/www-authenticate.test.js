@@ -21,6 +21,9 @@ var RFC2617_response=
     'cnonce="'+CNONCE+'", '+
     'response="6629fae49393a05397450978507c4ef1", '+
     'opaque="5ccc069c403ebaf9f0171e9517f40e41"';
+
+var mufasa_credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+
 function replace_nc(replacement,s)
 {
   return s.replace('00000001',replacement)
@@ -171,7 +174,7 @@ describe( 'www-authenticate', function() {
       parms['cnonce'].should.equal('abc"d,ef');  // double double quote properly parsed as single double quote
       done();
     } );
-    it( 'should provide a higher-level authenticator', function(done) {
+    it( 'should provide the old,deprecated higher-level authenticator', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       var authenticator= on_www_authenticate.authenticator;
       authenticator.get_challenge({
@@ -186,7 +189,7 @@ describe( 'www-authenticate', function() {
       headers.should.have.property('authorization',RFC2617_response);
       done();
     } );
-    it( 'should authenticate multiple messages with the higher-level authenticator', function(done) {
+    it( 'should authenticate multiple messages with the old,deprecated higher-level authenticator', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       var authenticator= on_www_authenticate.authenticator;
       authenticator.get_challenge({
@@ -212,7 +215,7 @@ describe( 'www-authenticate', function() {
       );
       done();
     } );
-    it( 'can authenticate using the options object to http.request', function(done) {
+    it( 'can authenticate using the old,deprecated higher-level interface and the options object to http.request', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       var authenticator= on_www_authenticate.authenticator;
       authenticator.get_challenge({
@@ -231,7 +234,7 @@ describe( 'www-authenticate', function() {
       options.headers.should.have.property('authorization',RFC2617_response);
       done();
     } );
-    it( 'can simply return the authentication string from the higher level functionality', function(done) {
+    it( 'can simply return the authentication string from the the old,deprecated higher level functionality', function(done) {
       var on_www_authenticate= www_authenticate("Mufasa","Circle Of Life",{cnonce:CNONCE})
       var authenticator= on_www_authenticate.authenticator;
       authenticator.get_challenge({
@@ -245,7 +248,7 @@ describe( 'www-authenticate', function() {
       done();
     } );
     it( 'allows user credentials instead of username/password ', function(done) {
-      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      var credentials= mufasa_credentials;
       var on_www_authenticate= www_authenticate(credentials,{cnonce:CNONCE})
       var authenticator= on_www_authenticate.authenticator;
       authenticator.get_challenge({
@@ -264,18 +267,88 @@ describe( 'www-authenticate', function() {
       done();
     } );
     it( 'exports user credentials that produce a hash of username, password and realm for digest authentication ', function(done) {
-      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      var credentials= mufasa_credentials;
       credentials.digest('testrealm@host.com').should.equal('939e7578ed9e3c518a452acee763bce9');
       done();
     } );
     it( 'exports a user credentials object that allows accessing the username', function(done) {
-      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      var credentials= mufasa_credentials;
       credentials.username.should.equal('Mufasa');
       done();
     } );
     it( 'exports a user credentials object that hides the password', function(done) {
-      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      var credentials= mufasa_credentials;
       credentials.should.not.have.property('password');
+      done();
+    } );
+
+    it( 'should provide a higher-level authenticator', function(done) {
+      var authenticator= www_authenticate.authenticator("Mufasa","Circle Of Life",{cnonce:CNONCE})
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      var headers= {}
+      authenticator.authenticate_headers(headers,"GET","/dir/index.html");
+      if (authenticator.err) throw err;
+      headers.should.have.property('authorization',RFC2617_response);
+      done();
+    } );
+    it( 'should authenticate multiple messages with the higher-level authenticator', function(done) {
+      var authenticator= www_authenticate.authenticator(mufasa_credentials,{cnonce:CNONCE})
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      var headers= {}
+      authenticator.authenticate_headers(headers,"GET","/dir/index.html");
+      if (authenticator.err) throw err;
+      headers.should.have.property('authorization',RFC2617_response);
+
+      headers= {}
+      authenticator.authenticate_headers(headers,"GET","/dir/other.html");
+      if (authenticator.err) throw err;
+      headers.should.have.property('authorization',
+        replace_uri('/dir/other.html',
+          replace_nc('00000002',
+            replace_response('8fd933ee1915789a949cf71f0cee4581',RFC2617_response)
+          )
+        )
+      );
+      done();
+    } );
+    it( 'can authenticate using the options object to http.request', function(done) {
+      var authenticator= www_authenticate.authenticator(mufasa_credentials,{cnonce:CNONCE})
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      var options= {
+        method: "GET",
+        path: "/dir/index.html"
+      }
+      authenticator.authenticate_request_options(options);
+      if (authenticator.err) throw err;
+      options.should.have.property('headers');
+      options.headers.should.have.property('authorization',RFC2617_response);
+      done();
+    } );
+    it( 'can simply return the authentication string from the higher level functionality', function(done) {
+      var authenticator= www_authenticate.authenticator(mufasa_credentials,{cnonce:CNONCE})
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      if (authenticator.err) throw err;
+      authenticator.authentication_string("GET","/dir/index.html").should.equal(RFC2617_response);
       done();
     } );
   } );
