@@ -24,6 +24,28 @@ Install the module with: `npm install www-authenticate`
 See examples below.
 
 ## Examples
+Use the high level interface:
+```javascript
+var www_authenticate = require('www-authenticate');
+var on_www_authenticate= www_authenticate(username,password)
+var authenticator= on_www_authenticate.authenticator;
+
+// Whenever you receive a response, send it to the authenticator.
+// The authenticator will parse and record any challenge it contains.
+authenticator.get_challenge(response);
+
+//... now, whenever you make a request the authenticator will add an
+// authorization header if a challenge has been received...
+ var options= {
+   method: "GET",
+   path: "/dir/index.html"
+ }
+ authenticator.authenticate_request_options(options);
+ if (authenticator.err) throw err;  // or do something similarly drastic
+ http.request(options);
+```
+---
+Use the low level interface:
 ```javascript
 var www_authenticate = require('www-authenticate');
 var on_www_authenticate= www_authenticate(username,password);
@@ -36,6 +58,7 @@ if (authenticator.err) throw err; // or do something similarly drastic
 response.setHeader('authorization', authenticator.authorize('GET',url));
 ```
 ---
+Parse www-authenticate or authentication-info headers:
 ```javascript
 var parsers = require('www-authenticate').parsers;
 var parsed= new parsers.WWW_Authenticate(request.headers['www-authenticate']);
