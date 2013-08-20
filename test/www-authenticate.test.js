@@ -1,6 +1,6 @@
 
 'use strict';
-require('should');
+should= require('should');
 var www_authenticate = require('..')
   , parsers = www_authenticate.parsers;
   ;
@@ -242,6 +242,40 @@ describe( 'www-authenticate', function() {
       });
       if (authenticator.err) throw err;
       authenticator.authentication_string("GET","/dir/index.html").should.equal(RFC2617_response);
+      done();
+    } );
+    it( 'allows user credentials instead of username/password ', function(done) {
+      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      var on_www_authenticate= www_authenticate(credentials,{cnonce:CNONCE})
+      var authenticator= on_www_authenticate.authenticator;
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+          'www-authenticate': RFC2617_challenge
+        }
+      });
+      if (authenticator.err) throw err;
+      authenticator.authentication_string("GET","/dir/index.html").should.equal(RFC2617_response);
+      done();
+    } );
+    it( 'exports user credentials that produce a hash of username and password for basic authentication ', function(done) {
+      var credentials= www_authenticate.user_credentials("Aladdin","open sesame");
+      credentials.basic().should.equal('QWxhZGRpbjpvcGVuIHNlc2FtZQ==');
+      done();
+    } );
+    it( 'exports user credentials that produce a hash of username, password and realm for digest authentication ', function(done) {
+      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      credentials.digest('testrealm@host.com').should.equal('939e7578ed9e3c518a452acee763bce9');
+      done();
+    } );
+    it( 'exports a user credentials object that allows accessing the username', function(done) {
+      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      credentials.username.should.equal('Mufasa');
+      done();
+    } );
+    it( 'exports a user credentials object that hides the password', function(done) {
+      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
+      credentials.should.not.have.property('password');
       done();
     } );
   } );
