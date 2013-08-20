@@ -1,6 +1,6 @@
 
 'use strict';
-should= require('should');
+var should require('should');
 var www_authenticate = require('..')
   , parsers = www_authenticate.parsers;
   ;
