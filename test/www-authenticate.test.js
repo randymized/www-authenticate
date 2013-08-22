@@ -2,7 +2,7 @@
 'use strict';
 var should= require('should');
 var www_authenticate = require('..')
-  , parsers = www_authenticate.parsers;
+  , parsers = www_authenticate.parsers
   ;
 
 var CNONCE='0a4f113b'
@@ -21,6 +21,7 @@ var RFC2617_response=
     'cnonce="'+CNONCE+'", '+
     'response="6629fae49393a05397450978507c4ef1", '+
     'opaque="5ccc069c403ebaf9f0171e9517f40e41"';
+var Basic_Authorization= 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==';
 
 var mufasa_credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
 
@@ -57,7 +58,7 @@ describe( 'www-authenticate', function() {
       if (authenticator.err) throw err;
       // now, whenever you need to create an Authorization header:
       authenticator.authorize("GET","/dir/index.html").should.equal(
-            'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
+            Basic_Authorization
       );
       done();
     } );
@@ -68,9 +69,7 @@ describe( 'www-authenticate', function() {
       var authenticator= on_www_authenticate('Basic realm="sample"');
       if (authenticator.err) throw err;
       // now, whenever you need to create an Authorization header:
-      authenticator.authorize().should.equal(
-            'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=='
-      );
+      authenticator.authorize().should.equal(Basic_Authorization);
       done();
     } );
     it( 'should be capable of doing Basic authentication without any password', function(done) {
@@ -349,6 +348,11 @@ describe( 'www-authenticate', function() {
       });
       if (authenticator.err) throw err;
       authenticator.authentication_string("GET","/dir/index.html").should.equal(RFC2617_response);
+      done();
+    } );
+    it( 'supports the sendImmediately option', function(done) {
+      var authenticator= www_authenticate.authenticator("Aladdin","open sesame",{sendImmediately:true});
+      authenticator.authentication_string("GET","/dir/index.html").should.equal(Basic_Authorization);
       done();
     } );
   } );
