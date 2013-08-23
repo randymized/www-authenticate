@@ -100,6 +100,7 @@ This module exports the parser that is used internally to parse a WWW-Authentica
 In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [Grunt](http://gruntjs.com/).
 
 ## Release History
+- v0.6.0: Add sendImmediately option.  Inspired by `request` module.
 - v0.5.0: The higher-level interface is now exported directly by the module
 - v0.4.0: Provides a higher-level interface
 - v0.3.0: If password is null, it, and preceding ':' will not be included in hash

@@ -25,6 +25,7 @@ var Basic_Authorization= 'Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==';
 
 var mufasa_credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life");
 
+
 function replace_nc(replacement,s)
 {
   return s.replace('00000001',replacement)
@@ -318,6 +319,28 @@ describe( 'www-authenticate', function() {
           )
         )
       );
+
+      headers= {}
+      authenticator.authenticate_headers(headers,"GET","/dir/other.html");
+      if (authenticator.err) throw err;
+      headers.should.have.property('authorization',
+        replace_uri('/dir/other.html',
+          replace_nc('00000003',
+            replace_response('6d478a009117669055ac19dade1c002f',RFC2617_response)
+          )
+        )
+      );
+
+      headers= {}
+      authenticator.authenticate_headers(headers,"GET","/dir/other.html");
+      if (authenticator.err) throw err;
+      headers.should.have.property('authorization',
+        replace_uri('/dir/other.html',
+          replace_nc('00000004',
+            replace_response('1d70a5a9982bf4dcb04149a9ad8a9ce3',RFC2617_response)
+          )
+        )
+      );
       done();
     } );
     it( 'can authenticate using the options object to http.request', function(done) {
@@ -353,6 +376,21 @@ describe( 'www-authenticate', function() {
     it( 'supports the sendImmediately option', function(done) {
       var authenticator= www_authenticate.authenticator("Aladdin","open sesame",{sendImmediately:true});
       authenticator.authentication_string("GET","/dir/index.html").should.equal(Basic_Authorization);
+      done();
+    } );
+    it( 'ignores 401 responses that do not contain a challenge', function(done) {
+      var authenticator= www_authenticate.authenticator(mufasa_credentials,{cnonce:CNONCE})
+      authenticator.get_challenge({
+        statusCode: 401,
+        headers: {
+        }
+      });
+      var options= {
+        method: "GET",
+        path: "/dir/index.html"
+      }
+      authenticator.authenticate_request_options(options);
+      options.should.not.have.property('err');
       done();
     } );
   } );
