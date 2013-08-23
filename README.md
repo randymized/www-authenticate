@@ -76,6 +76,7 @@ Without user credentials:
 ```javascript
 var www_authenticate = require('www-authenticate');
 var authenticator= www_authenticate.authenticator(username,password);
+```
 
 With user credentials:
 ```javascript
