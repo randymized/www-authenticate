@@ -281,6 +281,12 @@ describe( 'www-authenticate', function() {
       credentials.should.not.have.property('password');
       done();
     } );
+    it( 'exports user credentials that hide the basic authentication string and thus the password contained within ', function(done) {
+      var credentials= www_authenticate.user_credentials("Mufasa","Circle Of Life", {hide_basic:true});
+      credentials.digest('testrealm@host.com').should.equal('939e7578ed9e3c518a452acee763bce9');
+      credentials.basic().should.equal('')  // try to extract the pasword from this!
+      done();
+    } );
 
     it( 'should provide a higher-level authenticator', function(done) {
       var authenticator= www_authenticate.authenticator("Mufasa","Circle Of Life",{cnonce:CNONCE})
