@@ -1,5 +1,12 @@
 # www-authenticate [![Build Status](https://secure.travis-ci.org/randymized/www-authenticate.png?branch=master)](http://travis-ci.org/randymized/www-authenticate)
 
+[![Not Maintained](https://img.shields.io/badge/Maintenance%20Level-Abandoned-orange.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
+
+
+www-authenticate is **no longer being actively developed** and has been archived. 
+You are still welcome to use it but you may want to check for any forks that are more actively maintained.
+If it is of value to you, you are welcome to fork it or start a new project and incorporate its code into your project.
+
 ## Documentation
 Provides the functionality needed for a client to use HTTP Basic or Digest authentication.  Also provides primitives for parsing WWW-Authenticate and Authentication_Info headers.
 
